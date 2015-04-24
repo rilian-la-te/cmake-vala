@@ -1,6 +1,6 @@
 # Translations.cmake, CMake macros written for Marlin, feel free to re-use them
 
-macro (add_translations_directory NLS_PACKAGE COMPONENT_NAME)
+macro (add_translations_directory NLS_PACKAGE)
     add_custom_target (i18n ALL COMMENT “Building i18n messages.”)
     find_program (MSGFMT_EXECUTABLE msgfmt)
     # be sure that all languages are present
@@ -24,7 +24,7 @@ macro (add_translations_directory NLS_PACKAGE COMPONENT_NAME)
         install (FILES ${MO_OUTPUT} DESTINATION
             share/locale/${PO_INPUT_BASE}/LC_MESSAGES
             RENAME ${NLS_PACKAGE}.mo
-            COMPONENT ${COMPONENT_NAME})
+            COMPONENT ${ARGV1})
     endforeach (PO_INPUT ${PO_FILES})
     #Create *.desktop files
     file (GLOB_RECURSE SOURCE_FILES RELATIVE ${CMAKE_SOURCE_DIR}/ ${CMAKE_SOURCE_DIR}/*.desktop.plugin.in)

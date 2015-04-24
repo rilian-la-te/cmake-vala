@@ -12,7 +12,7 @@ if(GSETTINGS_COMPILE)
     message(STATUS "GSettings schemas will be compiled.")
 endif()
 
-macro(add_schema SCHEMA_NAME COMPONENT_NAME)
+macro(add_schema SCHEMA_NAME)
 
     set(PKG_CONFIG_EXECUTABLE pkg-config)
     # Have an option to not install the schema into where GLib is
@@ -33,7 +33,7 @@ macro(add_schema SCHEMA_NAME COMPONENT_NAME)
 
     # Actually install and recomple schemas
     message (STATUS "GSettings schemas will be installed into ${GSETTINGS_DIR}")
-    install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/${SCHEMA_NAME} DESTINATION ${GSETTINGS_DIR} COMPONENT ${COMPONENT_NAME} OPTIONAL)
+    install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/${SCHEMA_NAME} DESTINATION ${GSETTINGS_DIR} COMPONENT ${ARGV1} OPTIONAL)
 
     if (GSETTINGS_COMPILE)
         install (CODE "message (STATUS \"Compiling GSettings schemas\")")
