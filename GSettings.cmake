@@ -16,11 +16,12 @@ macro(add_schema SCHEMA_NAME)
 
     set(PKG_CONFIG_EXECUTABLE pkg-config)
     # Have an option to not install the schema into where GLib is
+    SET (GSETTINGS_DIR "${CMAKE_INSTALL_DATAROOTDIR}/glib-2.0/schemas/")
     if (GSETTINGS_LOCALINSTALL)
-        SET (GSETTINGS_DIR "${CMAKE_INSTALL_FULL_DATAROOTDIR}/glib-2.0/schemas/")
+        SET (GSETTINGS_PREFIX "${CMAKE_INSTALL_PREFIX}")
     else (GSETTINGS_LOCALINSTALL)
         execute_process (COMMAND ${PKG_CONFIG_EXECUTABLE} glib-2.0 --variable prefix OUTPUT_VARIABLE _glib_prefix OUTPUT_STRIP_TRAILING_WHITESPACE)
-        SET (GSETTINGS_DIR "${_glib_prefix}/share/glib-2.0/schemas/")
+        SET (GSETTINGS_PREFIX "${_glib_prefix}/share/glib-2.0/schemas/")
     endif (GSETTINGS_LOCALINSTALL)
 
     # Run the validator and error if it fails
@@ -32,11 +33,11 @@ macro(add_schema SCHEMA_NAME)
     endif (_schemas_invalid)
 
     # Actually install and recomple schemas
-    message (STATUS "GSettings schemas will be installed into ${GSETTINGS_DIR}")
+    message (STATUS "GSettings schemas will be installed into ${GSETTINGS_PREFIX}/${GSETTINGS_DIR}")
     install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/${SCHEMA_NAME} DESTINATION ${GSETTINGS_DIR} COMPONENT ${ARGV1} OPTIONAL)
 
     if (GSETTINGS_COMPILE)
         install (CODE "message (STATUS \"Compiling GSettings schemas\")")
-        install (CODE "execute_process (COMMAND ${_glib_comple_schemas} ${GSETTINGS_DIR})")
+        install (CODE "execute_process (COMMAND ${_glib_comple_schemas} ${GSETTINGS_PREFIX}/${GSETTINGS_DIR})")
     endif ()
 endmacro()
