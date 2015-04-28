@@ -211,6 +211,7 @@ macro(vala_precompile output target_name)
 
     # Workaround for a bug that would make valac run twice. This file is written
     # after the vala compiler generates C source code.
+    set(STAMP_TARGET ${target_name}_valac)
     set(OUTPUT_STAMP ${CMAKE_CURRENT_BINARY_DIR}/${target_name}_valac.stamp)
 
     add_custom_command(
@@ -242,7 +243,7 @@ macro(vala_precompile output target_name)
         "Generating ${out_files_display}"
     ${gircomp_command}
     )
-
+    add_custom_target(${STAMP_TARGET} DEPENDS ${in_files})
     # This command will be run twice for some reason (pass a non-empty string to COMMENT
     # in order to see it). Since valac is not executed from here, this won't be a problem.
     add_custom_command(OUTPUT ${out_files} DEPENDS ${OUTPUT_STAMP} COMMENT "")
