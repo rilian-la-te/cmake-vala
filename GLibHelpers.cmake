@@ -27,6 +27,7 @@ macro(add_glib_enumtypes outsources outheaders files name)
 		  > "${CMAKE_CURRENT_BINARY_DIR}/${name}.h"
 	  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 	  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${name}.h.template"
+		${files}
 	)
 	add_custom_command(
 		OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.c"
@@ -35,6 +36,7 @@ macro(add_glib_enumtypes outsources outheaders files name)
 			> "${CMAKE_CURRENT_BINARY_DIR}/${name}.c"
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 		DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${name}.c.template"
+			${files}
 	)
 	list(APPEND ${outsources} "${CMAKE_CURRENT_BINARY_DIR}/${name}.c")
 	list(APPEND ${outheaders} "${CMAKE_CURRENT_BINARY_DIR}/${name}.h")
