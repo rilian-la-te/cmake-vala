@@ -1,5 +1,6 @@
+find_package(GLibTools REQUIRED)
+
 macro(add_glib_marshal outsources outincludes name prefix)
-  find_package(GLibTools REQUIRED)
   add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.h"
     COMMAND ${GLIB-GENMARSHAL_EXECUTABLE} --header "--prefix=${prefix}"
@@ -39,3 +40,30 @@ macro(add_glib_enumtypes outsources outheaders files name)
 	list(APPEND ${outsources} "${CMAKE_CURRENT_BINARY_DIR}/${name}.c")
 	list(APPEND ${outheaders} "${CMAKE_CURRENT_BINARY_DIR}/${name}.h")
 endmacro(add_glib_enumtypes)
+
+macro(add_gdbus_codegen outfiles name prefix service_xml)
+  add_custom_command(
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.h" "${CMAKE_CURRENT_BINARY_DIR}/${name}.c"
+    COMMAND "${GDBUS-CODEGEN_EXECUTABLE}"
+        --interface-prefix "${prefix}"
+        --generate-c-code "${name}"
+        "${service_xml}"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    DEPENDS ${ARGN} "${service_xml}"
+  )
+  list(APPEND ${outfiles} "${CMAKE_CURRENT_BINARY_DIR}/${name}.c")
+endmacro(add_gdbus_codegen)
+
+macro(add_gdbus_codegen_with_namespace outfiles name prefix namespace service_xml)
+  add_custom_command(
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.h" "${CMAKE_CURRENT_BINARY_DIR}/${name}.c"
+    COMMAND "${GDBUS-CODEGEN_EXECUTABLE}"
+        --interface-prefix "${prefix}"
+        --generate-c-code "${name}"
+        --c-namespace "${namespace}"
+        "${service_xml}"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    DEPENDS ${ARGN} "${service_xml}"
+  )
+  list(APPEND ${outfiles} "${CMAKE_CURRENT_BINARY_DIR}/${name}.c")
+endmacro(add_gdbus_codegen_with_namespace)
