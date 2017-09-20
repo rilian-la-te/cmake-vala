@@ -1,5 +1,6 @@
+find_package(GLibTools REQUIRED)
+
 macro(add_glib_marshal outsources outincludes name prefix)
-  find_package(GLibTools REQUIRED QUIET)
   add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.h"
     COMMAND ${GLIB-GENMARSHAL_EXECUTABLE} --header "--prefix=${prefix}"
@@ -20,7 +21,6 @@ macro(add_glib_marshal outsources outincludes name prefix)
 endmacro(add_glib_marshal)
 
 macro(add_glib_enumtypes outsources outheaders name)
-    find_package(GLibTools REQUIRED QUIET)
     set(files ${ARGN})
 	add_custom_command(
 	  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.h"
@@ -43,7 +43,6 @@ macro(add_glib_enumtypes outsources outheaders name)
 	list(APPEND ${outsources} "${CMAKE_CURRENT_BINARY_DIR}/${name}.c")
 	list(APPEND ${outheaders} "${CMAKE_CURRENT_BINARY_DIR}/${name}.h")
 endmacro(add_glib_enumtypes)
-
 #.rst:
 #.. command:: add_gdbus_codegen
 #
@@ -65,7 +64,6 @@ endmacro(add_glib_enumtypes)
 #     )
 #
 function(ADD_GDBUS_CODEGEN _SOURCES _NAME _PREFIX SERVICE_XML)
-  find_package(GLibTools REQUIRED QUIET)
   set(_options ALL)
   set(_oneValueArgs NAMESPACE)
 
