@@ -34,7 +34,7 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 find_package(PkgConfig)
-pkg_check_modules(GTK3 gtk+-3.0)
+pkg_check_modules(GTK3 gtk+-3.0 QUIET)
 
 set(VERSION_OK TRUE)
 if (GTK3_VERSION)
@@ -50,21 +50,21 @@ if (GTK3_VERSION)
 endif ()
 
 if (GTK3_VERSION AND VERSION_OK)
-    pkg_check_modules(GTK3_QUARTZ gtk+-quartz-3.0)
+    pkg_check_modules(GTK3_QUARTZ gtk+-quartz-3.0 QUIET)
     if ("${GTK3_QUARTZ_VERSION}" VERSION_EQUAL "${GTK3_VERSION}")
         set(GTK3_SUPPORTS_QUARTZ TRUE)
     else ()
         set(GTK3_SUPPORTS_QUARTZ FALSE)
     endif ()
 
-    pkg_check_modules(GTK3_X11 gtk+-x11-3.0)
+    pkg_check_modules(GTK3_X11 gtk+-x11-3.0 QUIET)
     if ("${GTK3_X11_VERSION}" VERSION_EQUAL "${GTK3_VERSION}")
         set(GTK3_SUPPORTS_X11 TRUE)
     else ()
         set(GTK3_SUPPORTS_X11 FALSE)
     endif ()
 
-    pkg_check_modules(GTK3_WAYLAND gtk+-wayland-3.0)
+    pkg_check_modules(GTK3_WAYLAND gtk+-wayland-3.0 QUIET)
     if ("${GTK3_WAYLAND_VERSION}" VERSION_EQUAL "${GTK3_VERSION}")
         set(GTK3_SUPPORTS_WAYLAND TRUE)
     else ()
@@ -79,4 +79,4 @@ if (GTK3_VERSION AND VERSION_OK)
 endif ()
 
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(GTK3 DEFAULT_MSG GTK3_INCLUDE_DIRS GTK3_LIBRARIES VERSION_OK)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(GTK3 DEFAULT_MSG GTK3_INCLUDE_DIRS GTK3_LIBRARIES VERSION_VAR GTK3_VERSION)
