@@ -91,6 +91,7 @@ function(ADD_GDBUS_CODEGEN _SOURCES _NAME _PREFIX SERVICE_XML)
     COMMAND "${GDBUS-CODEGEN_EXECUTABLE}"
         --interface-prefix ${_PREFIX}
         --generate-c-code="${_NAME}"
+        --c-generate-autocleanup=all
         ${_NAMESPACE}
         ${_ABS_SERVICE_XML}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
