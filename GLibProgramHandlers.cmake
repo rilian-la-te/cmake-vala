@@ -1,17 +1,9 @@
 INCLUDE(CMakeParseArguments)
-find_package(GLIB2 REQUIRED COMPONENTS CODEGEN MKENUMS GENMARSHAL COMPILE_SCHEMAS COMPILE_RESOURCES GTESTER)
+find_package(GLIB2 QUIET COMPONENTS CODEGEN MKENUMS GENMARSHAL COMPILE_SCHEMAS COMPILE_RESOURCES GTESTER)
 
 option (GSETTINGS_LOCALINSTALL "Install GSettings Schemas locally instead of to the GLib prefix" ON)
 
 option (GSETTINGS_COMPILE "Compile GSettings Schemas after installation" ${GSETTINGS_LOCALINSTALL})
-
-if(GSETTINGS_LOCALINSTALL)
-    message(STATUS "GSettings schemas will be installed locally.")
-endif()
-
-if(GSETTINGS_COMPILE)
-    message(STATUS "GSettings schemas will be compiled.")
-endif()
 
 macro(add_schema SCHEMA_NAME)
     set(PKG_CONFIG_EXECUTABLE pkg-config)
@@ -25,7 +17,7 @@ macro(add_schema SCHEMA_NAME)
     endif ()
 
     # Run the validator and error if it fails
-    execute_process (COMMAND GLIB2::COMPILE_SCHEMAS --dry-run --schema-file=${CMAKE_CURRENT_SOURCE_DIR}/${SCHEMA_NAME} ERROR_VARIABLE _schemas_invalid OUTPUT_STRIP_TRAILING_WHITESPACE)
+    execute_process (COMMAND ${GLIB2_COMPILE_SCHEMAS_EXECUTABLE} --dry-run --schema-file=${CMAKE_CURRENT_SOURCE_DIR}/${SCHEMA_NAME} ERROR_VARIABLE _schemas_invalid OUTPUT_STRIP_TRAILING_WHITESPACE)
 
     if (_schemas_invalid)
       message (SEND_ERROR "Schema validation error: ${_schemas_invalid}")
@@ -37,21 +29,21 @@ macro(add_schema SCHEMA_NAME)
 
     if (GSETTINGS_COMPILE)
         install (CODE "message (STATUS \"Compiling GSettings schemas\")")
-        install (CODE "execute_process (COMMAND GLIB2::COMPILE_SCHEMAS ${GSETTINGS_PREFIX}/${GSETTINGS_DIR})")
+        install (CODE "execute_process (COMMAND ${GLIB2_COMPILE_SCHEMAS_EXECUTABLE} ${GSETTINGS_PREFIX}/${GSETTINGS_DIR})")
     endif ()
 endmacro()
 
-function(add_glib_marshal outsources outincludes name prefix)
+macro(add_glib_marshal outsources outincludes name prefix)
   add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.h"
-    COMMAND GLIB2::GENMARSHAL --header "--prefix=${prefix}"
+    COMMAND ${GLIB2_GENMARSHAL_EXECUTABLE} --header "--prefix=${prefix}"
             "${CMAKE_CURRENT_SOURCE_DIR}/${name}.list"
             > "${CMAKE_CURRENT_BINARY_DIR}/${name}.h"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${name}.list"
   )
   add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.c"
-    COMMAND GLIB2::GENMARSHAL --body "--prefix=${prefix}"
+    COMMAND ${GLIB2_GENMARSHAL_EXECUTABLE} --body "--prefix=${prefix}"
             "${CMAKE_CURRENT_SOURCE_DIR}/${name}.list"
             > "${CMAKE_CURRENT_BINARY_DIR}/${name}.c"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${name}.list"
@@ -59,13 +51,13 @@ function(add_glib_marshal outsources outincludes name prefix)
   )
   list(APPEND ${outsources} "${CMAKE_CURRENT_BINARY_DIR}/${name}.c")
   list(APPEND ${outincludes} "${CMAKE_CURRENT_BINARY_DIR}/${name}.h")
-endfunction(add_glib_marshal)
+endmacro(add_glib_marshal)
 
-function(add_glib_enumtypes outsources outheaders name)
+macro(add_glib_enumtypes outsources outheaders name)
     set(files ${ARGN})
 	add_custom_command(
 	  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.h"
-	  COMMAND GLIB2::MKENUMS ARGS --template ${name}".h.template"
+	  COMMAND ${GLIB2_MKENUMS_EXECUTABLE} ARGS --template ${name}".h.template"
           ${files}
 		  > "${CMAKE_CURRENT_BINARY_DIR}/${name}.h"
 	  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -74,7 +66,7 @@ function(add_glib_enumtypes outsources outheaders name)
 	)
 	add_custom_command(
 		OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.c"
-		COMMAND GLIB2::MKENUMS ARGS --template ${name}".c.template"
+		COMMAND ${GLIB2_MKENUMS_EXECUTABLE} ARGS --template ${name}".c.template"
                 ${files}
 			> "${CMAKE_CURRENT_BINARY_DIR}/${name}.c"
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -83,7 +75,7 @@ function(add_glib_enumtypes outsources outheaders name)
 	)
 	list(APPEND ${outsources} "${CMAKE_CURRENT_BINARY_DIR}/${name}.c")
 	list(APPEND ${outheaders} "${CMAKE_CURRENT_BINARY_DIR}/${name}.h")
-endfunction(add_glib_enumtypes)
+endmacro(add_glib_enumtypes)
 #.rst:
 #.. command:: add_gdbus_codegen
 #
@@ -129,7 +121,7 @@ function(ADD_GDBUS_CODEGEN _SOURCES _NAME _PREFIX SERVICE_XML)
 
   add_custom_command(
     OUTPUT ${_OUTPUT_FILES}
-    COMMAND GLIB2::CODEGEN
+    COMMAND ${GLIB2_CODEGEN_EXECUTABLE}
         --interface-prefix ${_PREFIX}
         --generate-c-code="${_NAME}"
         --c-generate-autocleanup=all
@@ -157,7 +149,7 @@ FUNCTION(GLIB_COMPILE_RESOURCES output)
     #FIXME implicit depends currently not working
     EXECUTE_PROCESS(
       COMMAND
-        GLIB2::COMPILE_RESOURCES
+        ${GLIB2_COMPILE_RESOURCES_EXECUTABLE}
           "--generate-dependencies"
           ${in_file}
       WORKING_DIRECTORY ${WORKING_DIR}
@@ -201,7 +193,7 @@ FUNCTION(GLIB_COMPILE_RESOURCES_FULLPATH output)
     #FIXME implicit depends currently not working
     EXECUTE_PROCESS(
       COMMAND
-          GLIB2::COMPILE_RESOURCES
+          ${GLIB2_COMPILE_RESOURCES_EXECUTABLE}
           "--generate-dependencies"
           ${in_file}
       WORKING_DIRECTORY ${WORKING_DIR}
@@ -216,7 +208,7 @@ FUNCTION(GLIB_COMPILE_RESOURCES_FULLPATH output)
       OUTPUT ${out_file}
       WORKING_DIRECTORY ${WORKING_DIR}
       COMMAND
-        GLIB2::COMPILE_RESOURCES
+        ${GLIB2_COMPILE_RESOURCES_EXECUTABLE}
       ARGS
         "--generate-source"
         "--target=${out_file}"
@@ -229,5 +221,5 @@ FUNCTION(GLIB_COMPILE_RESOURCES_FULLPATH output)
 ENDFUNCTION(GLIB_COMPILE_RESOURCES_FULLPATH)
 
 macro(add_test_executable EXE_NAME)
-    add_test(${EXE_NAME} GLIB2::GTESTER ${CMAKE_CURRENT_BINARY_DIR}/${EXE_NAME})
+    add_test(${EXE_NAME} ${GLIB2_GTESTER_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/${EXE_NAME})
 endmacro()
