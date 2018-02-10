@@ -1,0 +1,155 @@
+# - Try to find Libpeas and its GTK component
+#
+# Copyright (C) 2018 Konstantin Pugin <ria.freelander@gmail.com>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1.  Redistributions of source code must retain the above copyright
+#     notice, this list of conditions and the following disclaimer.
+# 2.  Redistributions in binary form must reproduce the above copyright
+#     notice, this list of conditions and the following disclaimer in the
+#     documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER AND ITS CONTRIBUTORS ``AS
+# IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+# THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR ITS
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+# OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+# ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE(PkgConfig QUIET)
+PKG_CHECK_MODULES(PC_PEAS QUIET libpeas-1.0)
+
+FIND_LIBRARY(PEAS_PEAS_LIBRARY
+    NAMES libpeas-1.0
+    HINTS ${PC_PEAS_LIBDIR}
+          ${PC_PEAS_LIBRARY_DIRS}
+)
+
+FIND_PATH(PEAS_PEAS_INCLUDE
+    NAMES libpeas/peas.h
+    HINTS ${PC_PEAS_INCLUDEDIR}
+          ${PC_PEAS_INCLUDE_DIRS}
+    PATH_SUFFIXES libpeas-1.0
+)
+
+SET(PEAS_PEAS_INCLUDE_DIRS ${PEAS_PEAS_INCLUDE})
+
+# Version detection
+SET(PEAS_PEAS_VERSION "${PC_PEAS_VERSION}")
+SET(PEAS_VERSION "${PEAS_PEAS_VERSION}")
+
+find_package_handle_standard_args(PEAS_PEAS
+    REQUIRED_VARS
+		PEAS_PEAS_LIBRARY
+        PEAS_PEAS_INCLUDE_DIRS
+    VERSION_VAR
+        PEAS_PEAS_VERSION
+    )
+
+mark_as_advanced(
+	PEAS_PEAS_LIBRARY
+    PEAS_PEAS_INCLUDE_DIRS
+)
+if(PEAS_PEAS_FOUND)
+    list(APPEND PEAS_LIBRARIES
+                "${PEAS_PEAS_LIBRARY}")
+    list(APPEND PEAS_INCLUDE_DIRS
+                "${PEAS_PEAS_INCLUDE_DIRS}")
+    set(PEAS_DEFINITIONS
+            ${PEAS_DEFINITIONS}
+            ${PC_PEAS_DEFINITIONS})
+    if(NOT TARGET PEAS::PEAS)
+        add_library(PEAS::PEAS UNKNOWN IMPORTED)
+        set_target_properties(PEAS::PEAS PROPERTIES
+            IMPORTED_LOCATION "${PEAS_PEAS_LIBRARY}"
+            INTERFACE_COMPILE_OPTIONS "${PC_PEAS_DEFINITIONS}"
+            INTERFACE_INCLUDE_DIRECTORIES "${PEAS_PEAS_INCLUDE_DIRS}"
+        )
+    endif()
+    list(APPEND PEAS_TARGETS
+                "PEAS::PEAS")
+endif()
+
+if(PEAS_PEAS_FOUND)
+
+	PKG_CHECK_MODULES(PC_PEAS_GTK QUIET libpeas-gtk-1.0)
+
+	FIND_LIBRARY(PEAS_GTK_LIBRARY
+		NAMES libpeas-gtk-1.0
+		HINTS ${PC_PEAS_GTK_LIBDIR}
+		      ${PC_PEAS_GTK_LIBRARY_DIRS}
+	)
+
+	FIND_PATH(PEAS_GTK_INCLUDE
+		NAMES libpeas-gtk/peas-gtk.h
+		HINTS ${PC_PEAS_GTK_INCLUDEDIR}
+		      ${PC_PEAS_GTK_INCLUDE_DIRS}
+		PATH_SUFFIXES libpeas-1.0
+	)
+
+	SET(PEAS_GTK_INCLUDE_DIRS ${PEAS_GTK_INCLUDE})
+
+	find_package_handle_standard_args(PEAS_GTK
+		REQUIRED_VARS
+			PEAS_GTK_LIBRARY
+		    PEAS_GTK_INCLUDE_DIRS
+		VERSION_VAR
+		    PEAS_GTK_VERSION
+		)
+
+	mark_as_advanced(
+		PEAS_GTK_LIBRARY
+		PEAS_GTK_INCLUDE_DIRS
+	)
+	if(PEAS_GTK_FOUND)
+		list(APPEND PEAS_LIBRARIES
+		            "${PEAS_GTK_LIBRARY}")
+		list(APPEND PEAS_INCLUDE_DIRS
+		            "${PEAS_GTK_INCLUDE_DIRS}")
+		set(PEAS_DEFINITIONS
+		        ${PEAS_DEFINITIONS}
+		        ${PC_PEAS_GTK_DEFINITIONS})
+		if(NOT TARGET PEAS::GTK)
+		    add_library(PEAS::GTK UNKNOWN IMPORTED)
+		    set_target_properties(PEAS::GTK PROPERTIES
+		        IMPORTED_LOCATION "${PEAS_GTK_LIBRARY}"
+		        INTERFACE_COMPILE_OPTIONS "${PC_PEAS_GTK_DEFINITIONS}"
+		        INTERFACE_INCLUDE_DIRECTORIES "${PEAS_GTK_INCLUDE_DIRS}"
+		    )
+		endif()
+		list(APPEND PEAS_TARGETS
+		            "PEAS::GTK")
+	endif()
+endif()
+
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(PEAS
+    REQUIRED_VARS
+        PEAS_LIBRARIES
+        PEAS_INCLUDE_DIRS
+    HANDLE_COMPONENTS
+    VERSION_VAR
+        PEAS_VERSION)
+
+
+if(PEAS_LIBRARIES)
+    list(REMOVE_DUPLICATES PEAS_LIBRARIES)
+endif()
+if(PEAS_INCLUDE_DIRS)
+    list(REMOVE_DUPLICATES PEAS_INCLUDE_DIRS)
+endif()
+if(PEAS_DEFINITIONS)
+    list(REMOVE_DUPLICATES PEAS_DEFINITIONS)
+endif()
+if(PEAS_TARGETS)
+    list(REMOVE_DUPLICATES PEAS_TARGETS)
+endif()
