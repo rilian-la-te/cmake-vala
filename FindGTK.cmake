@@ -45,14 +45,8 @@ else()
 endif()
 PKG_CHECK_MODULES(PC_${_module_name} QUIET gtk+-${_version_num})
 
-if(${_version_short} GREATER 2)
-	set(_main_lib_name gtk-${_version_short})
-else()
-	set(_main_lib_name gtk-x11-${_version_num}) 
-endif()
-
 FIND_LIBRARY(${_module_name}_GTK_LIBRARY
-    NAMES ${_main_lib_name}
+    NAMES gtk-${_version_short} gtk-x11-${_version_num}
     HINTS ${PC_${_module_name}_LIBDIR}
           ${PC_${_module_name}_LIBRARY_DIRS}
 )
