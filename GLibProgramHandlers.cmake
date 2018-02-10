@@ -164,7 +164,7 @@ FUNCTION(GLIB_COMPILE_RESOURCES output)
       OUTPUT ${out_file}
       WORKING_DIRECTORY ${WORKING_DIR}
       COMMAND
-        ${GLIB_COMPILE_RESOURCES_EXECUTABLE}
+        ${GLIB2_COMPILE_RESOURCES_EXECUTABLE}
       ARGS
         "--generate-source"
         "--target=${out_file}"
