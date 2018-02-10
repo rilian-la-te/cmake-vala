@@ -1,8 +1,5 @@
 # - Try to find Glib and its components (gio, gobject etc)
 #
-# Note that the respective _INCLUDE_DIR variables are not set, since
-# all headers are in the same directory as GLIB_INCLUDE_DIRS.
-#
 # Copyright (C) 2012 Raphael Kubo da Costa <rakuco@webkit.org>
 # Copyright (C) 2018 Konstantin Pugin <ria.freelander@gmail.com>
 #
@@ -95,12 +92,12 @@ if(GLIB2_GLIB_FOUND)
                 "${GLIB2_GLIB_INCLUDE_DIRS}")
     set(GLIB2_DEFINITIONS
             ${GLIB2_DEFINITIONS}
-            ${PKG_GLIB2_GLIB_DEFINITIONS})
+            ${PC_GLIB_DEFINITIONS})
     if(NOT TARGET GLIB2::GLIB)
         add_library(GLIB2::GLIB UNKNOWN IMPORTED)
         set_target_properties(GLIB2::GLIB PROPERTIES
             IMPORTED_LOCATION "${GLIB2_GLIB_LIBRARY}"
-            INTERFACE_COMPILE_OPTIONS "${PKG_GLIB2_GLIB_DEFINITIONS}"
+            INTERFACE_COMPILE_OPTIONS "${PC_GLIB_DEFINITIONS}"
             INTERFACE_INCLUDE_DIRECTORIES "${GLIB2_GLIB_INCLUDE_DIR}"
         )
     endif()
@@ -171,7 +168,7 @@ FOREACH (_component ${GLIB2_FIND_COMPONENTS})
                 add_library(GLIB2::${_component} UNKNOWN IMPORTED)
                 set_target_properties(GLIB2::${_component} PROPERTIES
                     IMPORTED_LOCATION "${GLIB2_${_component}_LIBRARY}"
-                    INTERFACE_COMPILE_OPTIONS "${PKG_GLIB2_${_component}_DEFINITIONS}"
+                    INTERFACE_COMPILE_OPTIONS "${PC_${_component}_DEFINITIONS}"
                     INTERFACE_INCLUDE_DIRECTORIES "${GLIB2_${_component}_INCLUDE_DIR}"
                     INTERFACE_LINK_LIBRARIES "${_comp_deps}"
                 )
