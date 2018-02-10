@@ -57,14 +57,23 @@ FIND_PATH(${_module_name}_GTK_INCLUDE
           ${PC_${_module_name}_INCLUDE_DIRS}
     PATH_SUFFIXES gtk-${_version_num}
 )
+PKG_CHECK_MODULES(PC_ATK QUIET atk-1.0)
+FIND_PATH(${_module_name}_ATK_INCLUDE
+    NAMES atk/atk.h
+    HINTS ${PC_ATK_INCLUDEDIR}
+          ${PC_ATK_INCLUDE_DIRS}
+    PATH_SUFFIXES atk-1.0
+)
 
 set(${_module_name}_GTK_VERSION ${PC_${_module_name}_VERSION})
 SET(${_module_name}_VERSION "${${_module_name}_GTK_VERSION}")
+set(${_module_name}_GTK_INCLUDE_DIRS ${${_module_name}_ATK_INCLUDE}
+									 ${${_module_name}_GTK_INCLUDE})
 
 find_package_handle_standard_args(${_module_name}_GTK
     REQUIRED_VARS
 		${_module_name}_GTK_LIBRARY
-        ${_module_name}_GTK_INCLUDE
+        ${_module_name}_GTK_INCLUDE_DIRS
     VERSION_VAR
         ${_module_name}_GTK_VERSION
     )
@@ -72,14 +81,14 @@ find_package_handle_standard_args(${_module_name}_GTK
 find_package_handle_standard_args(GTK_GTK
     REQUIRED_VARS
 		${_module_name}_GTK_LIBRARY
-        ${_module_name}_GTK_INCLUDE
+        ${_module_name}_GTK_INCLUDE_DIRS
     VERSION_VAR
         ${_module_name}_GTK_VERSION
     )
 
 mark_as_advanced(
 	${_module_name}_GTK_LIBRARY
-    ${_module_name}_GTK_INCLUDE
+    ${_module_name}_GTK_INCLUDE_DIRS
 )
 if(${_module_name}_GTK_FOUND)
     list(APPEND ${_module_name}_LIBRARIES
@@ -94,7 +103,7 @@ if(${_module_name}_GTK_FOUND)
         set_target_properties(${_module_name}::GTK PROPERTIES
             IMPORTED_LOCATION "${${_module_name}_GTK_LIBRARY}"
             INTERFACE_COMPILE_OPTIONS "${PC_${_module_name}_DEFINITIONS}"
-            INTERFACE_INCLUDE_DIRECTORIES "${${_module_name}_GTK_INCLUDE}"
+            INTERFACE_INCLUDE_DIRECTORIES "${${_module_name}_GTK_INCLUDE_DIRS}"
         )
     endif()
     list(APPEND ${_module_name}_TARGETS
@@ -133,11 +142,41 @@ FOREACH (_component ${_comp_iterator})
 		elseif (${_component} STREQUAL "GTK")
 			continue()
 		endif()
-        find_path(${_module_name}_${_component}_INCLUDE_DIR
-            NAMES ${_comp_header}
-            HINTS ${PC_${_component}_INCLUDE_DIRS}
-            PATH_SUFFIXES ${_path_suffix}
-        )
+		if(${_component} STREQUAL "GDK")
+			PKG_CHECK_MODULES(PC_PANGO QUIET pango)
+		    find_path(${_module_name}_${_component}_INCLUDE_PANGO
+		        NAMES pango/pango.h
+		        HINTS ${PC_PANGO_INCLUDE_DIRS}
+		        PATH_SUFFIXES pango-1.0
+		    )
+			PKG_CHECK_MODULES(PC_CAIRO QUIET cairo)
+		    find_path(${_module_name}_${_component}_INCLUDE_CAIRO
+		        NAMES cairo.h
+		        HINTS ${PC_CAIRO_INCLUDE_DIRS}
+		        PATH_SUFFIXES cairo
+		    )
+			PKG_CHECK_MODULES(PC_PIXBUF QUIET gdk-pixbuf-2.0)
+		    find_path(${_module_name}_${_component}_INCLUDE_GDK_PIXBUF
+		        NAMES gdk-pixbuf/gdk-pixbuf.h
+		        HINTS ${PC_PIXBUF_INCLUDE_DIRS}
+		        PATH_SUFFIXES gdk-pixbuf-2.0
+		    )
+		    find_path(${_module_name}_${_component}_INCLUDE_GDK
+		        NAMES ${_comp_header}
+		        HINTS ${PC_${_component}_INCLUDE_DIRS}
+		        PATH_SUFFIXES ${_path_suffix}
+		    )
+			set(${_module_name}_${_component}_INCLUDE_DIR ${${_module_name}_${_component}_INCLUDE_GDK}
+														  ${${_module_name}_${_component}_INCLUDE_PANGO}
+														  ${${_module_name}_${_component}_INCLUDE_CAIRO}
+														  ${${_module_name}_${_component}_INCLUDE_GDK_PIXBUF})
+		else()
+		    find_path(${_module_name}_${_component}_INCLUDE_DIR
+		        NAMES ${_comp_header}
+		        HINTS ${PC_${_component}_INCLUDE_DIRS}
+		        PATH_SUFFIXES ${_path_suffix}
+		    )
+		endif()
         find_library(${_module_name}_${_component}_LIBRARY
             NAMES ${_library_name}
             HINTS ${PC_${_component}_LIBRARY_DIRS}
