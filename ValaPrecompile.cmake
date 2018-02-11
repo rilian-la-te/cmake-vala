@@ -28,8 +28,8 @@
 # either expressed or implied, of Jakob Westhoff
 ##
 
-include(ParseArguments)
-find_package(Vala REQUIRED)
+include(CMakeParseArguments)
+find_package(Vala REQUIRED QUIET)
 
 ##
 # Compile vala files to their c equivalents for further processing. 
