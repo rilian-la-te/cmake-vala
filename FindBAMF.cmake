@@ -31,7 +31,7 @@ FIND_PACKAGE(PkgConfig QUIET)
 PKG_CHECK_MODULES(PC_BAMF QUIET libbamf3)
 
 FIND_LIBRARY(BAMF_LIB_LIBRARY
-    NAMES libbamf3
+    NAMES bamf3
     HINTS ${PC_BAMF_LIBDIR}
           ${PC_BAMF_LIBRARY_DIRS}
 )
@@ -101,7 +101,7 @@ mark_as_advanced(
 )
 if(BAMF_DAEMON_FOUND)
 	if(NOT TARGET BAMF::DAEMON)
-	    add_library(BAMF::DAEMON IMPORTED)
+	    add_executable(BAMF::DAEMON IMPORTED)
 	endif()
 	list(APPEND BAMF_TARGETS
 	            "BAMF::DAEMON")
