@@ -93,7 +93,7 @@ if (UNIX)
 
 find_library(X11_X11_LIB X11               ${X11_LIB_SEARCH_PATH})
 get_filename_component(X11_REALPATH ${X11_X11_LIB} REALPATH)
-get_filename_component(X11_VERSION ${X11_X11_LIB} EXT)
+get_filename_component(X11_VERSION ${X11_REALPATH} EXT)
 set(X11_X11_VERSION ${X11_VERSION})
 find_package_handle_standard_args(X11_X11
     REQUIRED_VARS
@@ -112,8 +112,8 @@ mark_as_advanced(
 )
 set(X11_X11_INCLUDE_DIR "${X11_X11_INCLUDE_PATH}" "${X11_Xlib_INCLUDE_PATH}" "${X11_Xutil_INCLUDE_PATH}")
 if(X11_X11_FOUND)
-    include(${CMAKE_CURRENT_LIST_DIR}/CheckFunctionExists.cmake)
-    include(${CMAKE_CURRENT_LIST_DIR}/CheckLibraryExists.cmake)
+    include(CheckFunctionExists)
+    include(CheckLibraryExists)
 
     # Translated from an autoconf-generated configure script.
     # See libs.m4 in autoconf's m4 directory.
