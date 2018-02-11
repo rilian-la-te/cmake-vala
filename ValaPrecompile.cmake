@@ -132,7 +132,7 @@ macro(vala_precompile output target_name)
     set(out_files_display "")
     set(${output} "")
 
-    foreach(src ${ARGS_DEFAULT_ARGS})
+    foreach(src ${ARGS_UNPARSED_ARGUMENTS})
         string(REGEX MATCH "^/" IS_MATCHED ${src})
         if(${IS_MATCHED} MATCHES "/")
             set(src_file_path ${src})
