@@ -113,9 +113,9 @@ find_package(Vala REQUIRED QUIET)
 # Most important is the variable VALA_C which will contain all the generated c
 # file names after the call.
 ##
-
+include(CMakeParseArguments)
 macro(vala_precompile output target_name)
-    parse_arguments(ARGS "TARGET;PACKAGES;OPTIONS;DIRECTORY;GENERATE_GIR;GENERATE_SYMBOLS;GENERATE_HEADER;GENERATE_VAPI;CUSTOM_VAPIS" "" ${ARGN})
+    cmake_parse_arguments(ARGS "DIRECTORY;GENERATE_GIR;GENERATE_HEADER;GENERATE_VAPI" "TARGET;PACKAGES;OPTIONS;GENERATE_SYMBOLS;CUSTOM_VAPIS" "" ${ARGN})
 
     if(ARGS_DIRECTORY)
         set(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${ARGS_DIRECTORY})
