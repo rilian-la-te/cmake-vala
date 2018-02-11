@@ -94,7 +94,7 @@ if (UNIX)
 find_library(X11_X11_LIB X11               ${X11_LIB_SEARCH_PATH})
 get_filename_component(X11_REALPATH ${X11_X11_LIB} REALPATH)
 get_filename_component(X11_VERSION ${X11_X11_LIB} EXT)
-set(X11_X11_VERSION X11_VERSION)
+set(X11_X11_VERSION ${X11_VERSION})
 find_package_handle_standard_args(X11_X11
     REQUIRED_VARS
         X11_X11_LIB
