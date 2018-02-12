@@ -44,7 +44,6 @@ else()
 	set(_version_num ${GTK_VERSION_MAX_SUPPORTED}.0)
 	set(_version_short ${GTK_VERSION_MAX_SUPPORTED})
 endif()
-
 #Search for GDK and dependencies in include files
 PKG_CHECK_MODULES(PC_GDK QUIET gdk-${_version_num})
 find_library(${_module_name}_GDK_LIBRARY
@@ -256,14 +255,6 @@ FOREACH (_component ${GTK_COMP_TOOLS})
 	endif()
 endforeach()
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(${_module_name}
-    REQUIRED_VARS
-        ${_module_name}_LIBRARIES
-        ${_module_name}_INCLUDE_DIRS
-    HANDLE_COMPONENTS
-    VERSION_VAR
-        ${_module_name}_VERSION)
-
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GTK
     REQUIRED_VARS
         ${_module_name}_LIBRARIES
@@ -271,6 +262,9 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(GTK
 	HANDLE_COMPONENTS
     VERSION_VAR
         ${_module_name}_VERSION)
+if((NOT GTK_FIND_QUIETLY) AND GTK_FOUND)
+	message("Found gtk+-${_version_num}, version ${${_module_name}_VERSION}")
+endif()
 
 if(${_module_name}_LIBRARIES)
     list(REMOVE_DUPLICATES ${_module_name}_LIBRARIES)
