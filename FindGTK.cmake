@@ -80,17 +80,17 @@ find_path(${_module_name}_INCLUDE_GDK
     HINTS ${PC_GDK_INCLUDE_DIRS}
     PATH_SUFFIXES gdk-${_version_num}
 )
-set(${_module_name}_GDK_INCLUDE_DIR ${${_module_name}_GDK_INCLUDE_GDK}
-											  ${${_module_name}_GDK_INCLUDE_PANGO}
-											  ${${_module_name}_GDK_INCLUDE_CAIRO}
-											  ${${_module_name}_GDK_INCLUDE_GDK_PIXBUF})
+set(${_module_name}_GDK_INCLUDE_DIR ${${_module_name}_INCLUDE_GDK}
+											  ${${_module_name}_INCLUDE_PANGO}
+											  ${${_module_name}_INCLUDE_CAIRO}
+											  ${${_module_name}_INCLUDE_GDK_PIXBUF})
 
 if(${_module_name}_GDK_INCLUDE_DIR AND ${_module_name}_GDK_LIBRARY)
 	set(${_module_name}_GDK_FOUND TRUE)
 else()
 	set(${_module_name}_GDK_FOUND FALSE)
 endif()
-set(GTK_GDK_FOUND ${_module_name}_GDK_FOUND)
+set(GTK_GDK_FOUND ${${_module_name}_GDK_FOUND})
 
 mark_as_advanced(
 	${_module_name}_GDK_LIBRARY
@@ -172,7 +172,7 @@ if(${_module_name}_GTK_INCLUDE_DIRS AND ${_module_name}_GTK_LIBRARY)
 else()
 	set(${_module_name}_GTK_FOUND FALSE)
 endif()
-set(GTK_GTK_FOUND ${_module_name}_GTK_FOUND)
+set(GTK_GTK_FOUND ${${_module_name}_GTK_FOUND})
 
 mark_as_advanced(
 	${_module_name}_GTK_LIBRARY
@@ -211,7 +211,7 @@ if(${_module_name}_UNIX_PRINT_INCLUDE)
 else()
 	set(${_module_name}_UNIX_PRINT_FOUND FALSE)
 endif()
-set(GTK_UNIX_PRINT_FOUND ${_module_name}_UNIX_PRINT_FOUND)
+set(GTK_UNIX_PRINT_FOUND ${${_module_name}_UNIX_PRINT_FOUND})
 
 if(${_module_name}_UNIX_PRINT_FOUND)
     list(APPEND ${_module_name}_INCLUDE_DIRS
@@ -255,12 +255,6 @@ FOREACH (_component ${GTK_COMP_TOOLS})
                     "${_module_name}::${_component}")
 	endif()
 endforeach()
-
-if(GTK_FIND_COMPONENTS)
-	set(_comp_iterator ${GTK_FIND_COMPONENTS})
-else()
-	set(_comp_iterator ${${_module_name}_FIND_COMPONENTS})
-endif()
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(${_module_name}
     REQUIRED_VARS
