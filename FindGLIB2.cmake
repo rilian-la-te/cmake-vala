@@ -71,16 +71,11 @@ SET(GLIB_VERSION_MICRO "${CMAKE_MATCH_1}")
 SET(GLIB2_GLIB_VERSION "${GLIB_VERSION_MAJOR}.${GLIB_VERSION_MINOR}.${GLIB_VERSION_MICRO}")
 SET(GLIB2_VERSION "${GLIB2_GLIB_VERSION}")
 
-find_package_handle_standard_args(GLIB2_GLIB
-    FOUND_VAR
-        GLIB2_GLIB_FOUND
-    REQUIRED_VARS
-		GLIB2_GLIB_LIBRARY
-        GLIB2_GLIB_INCLUDE_DIRS
-    VERSION_VAR
-        GLIB2_GLIB_VERSION
-    )
-
+if(${GLIB2_GLIB_LIBRARY} AND ${GLIB2_GLIB_INCLUDE_DIRS})
+	set(GLIB_GLIB_FOUND TRUE)
+else()
+	set(GLIB2_GLIB_FOUND FALSE)
+endif()
 mark_as_advanced(
 	GLIB2_GLIB_LIBRARY
     GLIB2_GLIB_INCLUDE_DIRS
@@ -109,7 +104,6 @@ endif()
 FOREACH (_component ${GLIB2_FIND_COMPONENTS})
 	string(TOLOWER "${_component}" _lc_comp)
 	string(REPLACE "_" "-" _rep_comp "${_lc_comp}")
-    set(GLIB2_${_component}_VERSION "${GLIB2_VERSION}")
 	if(_component IN_LIST GLIB2_COMP_LIBRARIES)
 		PKG_CHECK_MODULES(PC_${_component} QUIET ${_rep_comp}-2.0)
 		list(APPEND _comp_deps "GLIB2::GLIB")
@@ -145,16 +139,11 @@ FOREACH (_component ${GLIB2_FIND_COMPONENTS})
             NAMES ${_library_name}
             HINTS ${PC_${_component}_LIBRARY_DIRS}
         )
-        find_package_handle_standard_args(GLIB2_${_component}
-            FOUND_VAR
-                GLIB2_${_component}_FOUND
-            REQUIRED_VARS
-                GLIB2_${_component}_LIBRARY
-                GLIB2_${_component}_INCLUDE_DIR
-                ${_comp_dep_vars}
-            VERSION_VAR
-                GLIB2_${_component}_VERSION
-            )
+		if(${GLIB2_${_component}_LIBRARY} AND ${GLIB2_${_component}_INCLUDE_DIR} AND ${${_comp_dep_vars}})
+			set(GLIB2_${_component}_FOUND TRUE)
+		else()
+			set(GLIB2_${_component}_FOUND FALSE)
+		endif()
         mark_as_advanced(
             GLIB2_${_component}_LIBRARY
             GLIB2_${_component}_INCLUDE_DIR
@@ -190,14 +179,11 @@ FOREACH (_component ${GLIB2_FIND_COMPONENTS})
 		find_program(GLIB2_${_component}_EXECUTABLE
 			${_program_name}
 		)
-        find_package_handle_standard_args(GLIB2_${_component}
-            FOUND_VAR
-                GLIB2_${_component}_FOUND
-            REQUIRED_VARS
-                GLIB2_${_component}_EXECUTABLE
-            VERSION_VAR
-                GLIB2_${_component}_VERSION
-            )
+		if(GLIB2_${_component}_EXECUTABLE})
+			set(GLIB2_${_component}_FOUND TRUE)
+		else()
+			set(GLIB2_${_component}_FOUND FALSE)
+		endif()
         mark_as_advanced(
             GLIB2_${_component}_EXECUTABLE
         )
