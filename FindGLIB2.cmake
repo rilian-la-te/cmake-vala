@@ -184,7 +184,7 @@ FOREACH (_component ${GLIB2_FIND_COMPONENTS})
 		find_program(GLIB2_${_component}_EXECUTABLE
 			${_program_name}
 		)
-		if(GLIB2_${_component}_EXECUTABLE})
+		if(GLIB2_${_component}_EXECUTABLE)
 			set(GLIB2_${_component}_FOUND TRUE)
 		else()
 			set(GLIB2_${_component}_FOUND FALSE)
