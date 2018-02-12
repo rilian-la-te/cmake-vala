@@ -71,12 +71,10 @@ SET(GLIB_VERSION_MICRO "${CMAKE_MATCH_1}")
 SET(GLIB2_GLIB_VERSION "${GLIB_VERSION_MAJOR}.${GLIB_VERSION_MINOR}.${GLIB_VERSION_MICRO}")
 SET(GLIB2_VERSION "${GLIB2_GLIB_VERSION}")
 
-if(NOT ${GLIB2_GLIB_LIBRARY})
-	set(GLIB_GLIB_FOUND FALSE)
-elseif(NOT ${GLIB2_GLIB_INCLUDE_DIRS})
-	set(GLIB_GLIB_FOUND FALSE)
+if(${GLIB2_GLIB_LIBRARY} AND ${GLIB2_GLIB_INCLUDE} AND ${GLIBCONFIG_INCLUDE_DIR})
+	set(GLIB_GLIB_FOUND TRUE)
 else()
-	set(GLIB2_GLIB_FOUND TRUE)
+	set(GLIB2_GLIB_FOUND FALSE)
 endif()
 mark_as_advanced(
 	GLIB2_GLIB_LIBRARY
@@ -141,14 +139,10 @@ FOREACH (_component ${GLIB2_FIND_COMPONENTS})
             NAMES ${_library_name}
             HINTS ${PC_${_component}_LIBRARY_DIRS}
         )
-		if(NOT ${GLIB2_${_component}_LIBRARY})
-			set(GLIB2_${_component}_FOUND FALSE)
-		elseif (NOT ${GLIB2_${_component}_INCLUDE_DIR})
-			set(GLIB2_${_component}_FOUND FALSE)
-		elseif (NOT ${${_comp_dep_vars}})
-			set(GLIB2_${_component}_FOUND FALSE)
-		else()
+		if(${GLIB2_${_component}_LIBRARY} AND ${GLIB2_${_component}_INCLUDE_DIR} AND ${${_comp_dep_vars}})
 			set(GLIB2_${_component}_FOUND TRUE)
+		else()
+			set(GLIB2_${_component}_FOUND FALSE)
 		endif()
         mark_as_advanced(
             GLIB2_${_component}_LIBRARY
@@ -185,10 +179,10 @@ FOREACH (_component ${GLIB2_FIND_COMPONENTS})
 		find_program(GLIB2_${_component}_EXECUTABLE
 			${_program_name}
 		)
-		if(NOT ${GLIB2_${_component}_EXECUTABLE})
-			set(GLIB2_${_component}_FOUND FALSE)
-		else()
+		if(GLIB2_${_component}_EXECUTABLE})
 			set(GLIB2_${_component}_FOUND TRUE)
+		else()
+			set(GLIB2_${_component}_FOUND FALSE)
 		endif()
         mark_as_advanced(
             GLIB2_${_component}_EXECUTABLE
