@@ -139,8 +139,12 @@ FOREACH (_component ${GLIB2_FIND_COMPONENTS})
             NAMES ${_library_name}
             HINTS ${PC_${_component}_LIBRARY_DIRS}
         )
-		if(GLIB2_${_component}_LIBRARY AND GLIB2_${_component}_INCLUDE_DIR AND ${_comp_dep_vars})
+		if(GLIB2_${_component}_LIBRARY AND GLIB2_${_component}_INCLUDE_DIR)
 			set(GLIB2_${_component}_FOUND TRUE)
+		    foreach(_CURRENT_VAR ${_comp_dep_vars})
+				if(NOT ${_CURRENT_VAR})
+					set(GLIB2_${_component}_FOUND FALSE)
+		    endforeach()
 		else()
 			set(GLIB2_${_component}_FOUND FALSE)
 		endif()
