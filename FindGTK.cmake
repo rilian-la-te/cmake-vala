@@ -34,6 +34,7 @@ set(GTK_VERSION_MAX_SUPPORTED 3)
 
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE(PkgConfig QUIET)
+#Version checker - sets seachable version
 if (${GTK_FIND_VERSION_MAJOR})
 	set(_module_name GTK${GTK_FIND_VERSION_MAJOR})
 	set(_version_num ${GTK_FIND_VERSION_MAJOR}.0)
@@ -43,6 +44,93 @@ else()
 	set(_version_num ${GTK_VERSION_MAX_SUPPORTED}.0)
 	set(_version_short ${GTK_VERSION_MAX_SUPPORTED})
 endif()
+
+#Search for GDK and dependencies in include files
+PKG_CHECK_MODULES(PC_GDK QUIET gdk-${_version_num})
+find_library(${_module_name}_GDK_LIBRARY
+    NAMES gdk-${_version_short} gdk-x11-${_version_num}
+    HINTS ${PC_GDK_LIBRARY_DIRS}
+)
+GET_FILENAME_COMPONENT(_GDK_LIBRARY_DIR ${${_module_name}_GDK_LIBRARY} PATH)
+FIND_PATH(${_module_name}_GDK_CONFIG_INCLUDE_DIR
+    NAMES gdkconfig.h
+    HINTS ${PC_GDK_LIBDIR} ${PC_GDK_LIBRARY_DIRS} ${_GDK_LIBRARY_DIR} ${PC_GDK_INCLUDE_DIRS}
+    PATH_SUFFIXES gdk-${_version_num}/include gtk-${_version_num}/gdk
+)
+PKG_CHECK_MODULES(PC_PANGO QUIET pango)
+find_path(${_module_name}_INCLUDE_PANGO
+    NAMES pango/pango.h
+    HINTS ${PC_PANGO_INCLUDE_DIRS}
+    PATH_SUFFIXES pango-1.0
+)
+PKG_CHECK_MODULES(PC_CAIRO QUIET cairo)
+find_path(${_module_name}_INCLUDE_CAIRO
+    NAMES cairo.h
+    HINTS ${PC_CAIRO_INCLUDE_DIRS}
+    PATH_SUFFIXES cairo
+)
+PKG_CHECK_MODULES(PC_PIXBUF QUIET gdk-pixbuf-2.0)
+find_path(${_module_name}_INCLUDE_GDK_PIXBUF
+    NAMES gdk-pixbuf/gdk-pixbuf.h
+    HINTS ${PC_PIXBUF_INCLUDE_DIRS}
+    PATH_SUFFIXES gdk-pixbuf-2.0
+)
+find_path(${_module_name}_INCLUDE_GDK
+    NAMES gdk/gdk.h
+    HINTS ${PC_GDK_INCLUDE_DIRS}
+    PATH_SUFFIXES gdk-${_version_num}
+)
+set(${_module_name}_GDK_INCLUDE_DIR ${${_module_name}_GDK_INCLUDE_GDK}
+											  ${${_module_name}_GDK_INCLUDE_PANGO}
+											  ${${_module_name}_GDK_INCLUDE_CAIRO}
+											  ${${_module_name}_GDK_INCLUDE_GDK_PIXBUF})
+
+if(${_module_name}_GDK_INCLUDE_DIR AND ${_module_name}_GDK_LIBRARY)
+	set(${_module_name}_GDK_FOUND TRUE)
+else()
+	set(${_module_name}_GDK_FOUND FALSE)
+endif()
+set(GTK_GDK_FOUND ${_module_name}_GDK_FOUND)
+
+mark_as_advanced(
+	${_module_name}_GDK_LIBRARY
+    ${_module_name}_GDK_INCLUDE_DIR
+)
+
+if(${_module_name}_GDK_FOUND)
+    list(APPEND ${_module_name}_LIBRARIES
+                "${${_module_name}_GDK_LIBRARY}")
+    list(APPEND ${_module_name}_INCLUDE_DIRS
+                "${${_module_name}_GDK_INCLUDE}")
+    set(${_module_name}_DEFINITIONS
+            ${${_module_name}_DEFINITIONS}
+            ${PC_GDK_DEFINITIONS})
+    if(NOT TARGET ${_module_name}::GDK)
+        add_library(${_module_name}::GDK UNKNOWN IMPORTED)
+        set_target_properties(${_module_name}::GDK PROPERTIES
+            IMPORTED_LOCATION "${${_module_name}_GDK_LIBRARY}"
+            INTERFACE_COMPILE_OPTIONS "${PC_GDK_DEFINITIONS}"
+            INTERFACE_INCLUDE_DIRECTORIES "${${_module_name}_GDK_INCLUDE_DIR}"
+        )
+    endif()
+    list(APPEND ${_module_name}_TARGETS
+                "${_module_name}::GDK")
+endif()
+
+# Platforms detection
+FILE(READ "${${_module_name}_GDK_CONFIG_INCLUDE_DIR}/gdkconfig.h" GDKCONFIG_H_CONTENTS)
+foreach(_platform ${GTK_COMP_PLATFORMS})
+	STRING(FIND "${GDKCONFIG_H_CONTENTS}" "#define GDK_WINDOWING_${_platform}" _INT)
+	if(_INT LESS 0)
+		set(${_module_name}_${_platform}_FOUND FALSE)
+	else()
+		set(${_module_name}_${_platform}_FOUND TRUE)
+	endif()
+	set(GTK_${_platform}_FOUND ${${_module_name}_${_platform}_FOUND})
+endforeach()
+
+#Search for GTK and dependencies in include files
+
 PKG_CHECK_MODULES(PC_${_module_name} QUIET gtk+-${_version_num})
 
 FIND_LIBRARY(${_module_name}_GTK_LIBRARY
@@ -65,26 +153,26 @@ FIND_PATH(${_module_name}_ATK_INCLUDE
     PATH_SUFFIXES atk-1.0
 )
 
-set(${_module_name}_GTK_VERSION ${PC_${_module_name}_VERSION})
-SET(${_module_name}_VERSION "${${_module_name}_GTK_VERSION}")
+# Version detection
+FILE(READ "${${_module_name}_GTK_INCLUDE}/gtkversion.h" GTKVERSION_H_CONTENTS)
+STRING(REGEX MATCH "#define GTK_MAJOR_VERSION ([0-9]+)" _dummy "${GTKVERSION_H_CONTENTS}")
+SET(${_module_name}_VERSION_MAJOR "${CMAKE_MATCH_1}")
+STRING(REGEX MATCH "#define GTK_MINOR_VERSION ([0-9]+)" _dummy "${GTKVERSION_H_CONTENTS}")
+SET(${_module_name}_VERSION_MINOR "${CMAKE_MATCH_1}")
+STRING(REGEX MATCH "#define GTK_MICRO_VERSION ([0-9]+)" _dummy "${GTKVERSION_H_CONTENTS}")
+SET(${_module_name}_VERSION_MICRO "${CMAKE_MATCH_1}")
+SET(${_module_name}_VERSION "${${_module_name}_VERSION_MAJOR}.${${_module_name}_VERSION_MINOR}.${${_module_name}_VERSION_MICRO}")
+SET(GTK_VERSION "${${_module_name}_VERSION}")
+
 set(${_module_name}_GTK_INCLUDE_DIRS ${${_module_name}_ATK_INCLUDE}
 									 ${${_module_name}_GTK_INCLUDE})
 
-find_package_handle_standard_args(${_module_name}_GTK
-    REQUIRED_VARS
-		${_module_name}_GTK_LIBRARY
-        ${_module_name}_GTK_INCLUDE_DIRS
-    VERSION_VAR
-        ${_module_name}_GTK_VERSION
-    )
-
-find_package_handle_standard_args(GTK_GTK
-    REQUIRED_VARS
-		${_module_name}_GTK_LIBRARY
-        ${_module_name}_GTK_INCLUDE_DIRS
-    VERSION_VAR
-        ${_module_name}_GTK_VERSION
-    )
+if(${_module_name}_GTK_INCLUDE_DIRS AND ${_module_name}_GTK_LIBRARY)
+	set(${_module_name}_GTK_FOUND TRUE)
+else()
+	set(${_module_name}_GTK_FOUND FALSE)
+endif()
+set(GTK_GTK_FOUND ${_module_name}_GTK_FOUND)
 
 mark_as_advanced(
 	${_module_name}_GTK_LIBRARY
@@ -104,221 +192,75 @@ if(${_module_name}_GTK_FOUND)
             IMPORTED_LOCATION "${${_module_name}_GTK_LIBRARY}"
             INTERFACE_COMPILE_OPTIONS "${PC_${_module_name}_DEFINITIONS}"
             INTERFACE_INCLUDE_DIRECTORIES "${${_module_name}_GTK_INCLUDE_DIRS}"
+			INTERFACE_LINK_LIBRARIES "${_module_name}::GDK"
         )
     endif()
     list(APPEND ${_module_name}_TARGETS
                 "${_module_name}::GTK")
 endif()
 
+#Search for unix-print in include files
+PKG_CHECK_MODULES(PC_UNIX_PRINT QUIET gtk+-unix-print-${_version_num})
+find_path(${_module_name}_UNIX_PRINT_INCLUDE
+    NAMES gtk/gtkunixprint.h
+    HINTS ${PC_UNIX_PRINT_INCLUDE_DIRS}
+    PATH_SUFFIXES gtk-${_version_num}/unix-print
+)
+if(${_module_name}_UNIX_PRINT_INCLUDE)
+	set(${_module_name}_UNIX_PRINT_FOUND TRUE)
+else()
+	set(${_module_name}_UNIX_PRINT_FOUND FALSE)
+endif()
+set(GTK_UNIX_PRINT_FOUND ${_module_name}_UNIX_PRINT_FOUND)
+
+if(${_module_name}_UNIX_PRINT_FOUND)
+    list(APPEND ${_module_name}_INCLUDE_DIRS
+                "${${_module_name}_UNIX_PRINT_INCLUDE}")
+    set(${_module_name}_DEFINITIONS
+            ${${_module_name}_DEFINITIONS}
+            ${PC_UNIX_PRINT_DEFINITIONS})
+    if(NOT TARGET ${_module_name}::UNIX_PRINT)
+        add_library(${_module_name}::UNIX_PRINT UNKNOWN IMPORTED)
+        set_target_properties(${_module_name}::UNIX_PRINT PROPERTIES
+            INTERFACE_COMPILE_OPTIONS "${PC_UNIX_PRINT_DEFINITIONS}"
+            INTERFACE_INCLUDE_DIRECTORIES "${${_module_name}_UNIX_PRINT_INCLUDE}"
+			INTERFACE_LINK_LIBRARIES "${_module_name}::GTK"
+        )
+    endif()
+    list(APPEND ${_module_name}_TARGETS
+                "${_module_name}::UNIX_PRINT")
+endif()
+#Search for executables
+FOREACH (_component ${GTK_COMP_TOOLS})
+	string(TOLOWER "${_component}" _lc_comp)
+	string(REPLACE "_" "-" _rep_comp "${_lc_comp}")
+	set(_program_name gtk-${_rep_comp})
+	find_program(${_module_name}_${_component}_EXECUTABLE
+		${_program_name}
+	)
+	if(${_module_name}_${_component}_EXECUTABLE)
+		set(${_module_name}_${_component}_FOUND TRUE)
+	else()
+		set(${_module_name}_${_component}_FOUND FALSE)
+	endif()
+	set(GTK_${_component}_FOUND ${${_module_name}_${_component}_FOUND})
+    mark_as_advanced(
+        ${_module_name}_${_component}_EXECUTABLE
+    )
+    if(${_module_name}_${_component}_FOUND)
+        if(NOT TARGET ${_module_name}::${_component})
+            add_executable(${_module_name}::${_component} IMPORTED)
+        endif()
+        list(APPEND ${_module_name}_TARGETS
+                    "${_module_name}::${_component}")
+	endif()
+endforeach()
+
 if(GTK_FIND_COMPONENTS)
 	set(_comp_iterator ${GTK_FIND_COMPONENTS})
 else()
 	set(_comp_iterator ${${_module_name}_FIND_COMPONENTS})
 endif()
-
-# Additional GTK components.
-FOREACH (_component ${_comp_iterator})
-	string(TOLOWER "${_component}" _lc_comp)
-	string(REPLACE "_" "-" _rep_comp "${_lc_comp}")
-    set(${_module_name}_${_component}_VERSION "${${_module_name}_VERSION}")
-	list(APPEND _comp_deps "${_module_name}::GTK")
-    list(APPEND _comp_dep_vars "${_module_name}_GTK_FOUND")
-	set(_path_suffix gtk)
-	if(_component IN_LIST GTK_COMP_LIBRARIES)
-		set(_path_suffix gtk-${_version_num})
-		set(_library_name gtk-${_version_short})
-	    if (${_component} STREQUAL "UNIX_PRINT")
-			PKG_CHECK_MODULES(PC_${_component} QUIET gtk+-${_rep_comp}-${_version_num})
-			set(_comp_header gtk/gtkunixprint.h)
-			set(_path_suffix gtk-${_version_num}/unix-print)
-	    elseif (${_component} STREQUAL "GDK")
-			PKG_CHECK_MODULES(PC_${_component} QUIET ${_rep_comp}-${_version_num})
-			set(_comp_header gdk/gdk.h)
-			if(${_version_short} GREATER 2)
-				set(_library_name gdk-${_version_short})
-			else()
-				set(_library_name gdk-x11-${_version_num})
-			endif()
-		elseif (${_component} STREQUAL "GTK")
-			continue()
-		endif()
-		if(${_component} STREQUAL "GDK")
-			PKG_CHECK_MODULES(PC_PANGO QUIET pango)
-		    find_path(${_module_name}_${_component}_INCLUDE_PANGO
-		        NAMES pango/pango.h
-		        HINTS ${PC_PANGO_INCLUDE_DIRS}
-		        PATH_SUFFIXES pango-1.0
-		    )
-			PKG_CHECK_MODULES(PC_CAIRO QUIET cairo)
-		    find_path(${_module_name}_${_component}_INCLUDE_CAIRO
-		        NAMES cairo.h
-		        HINTS ${PC_CAIRO_INCLUDE_DIRS}
-		        PATH_SUFFIXES cairo
-		    )
-			PKG_CHECK_MODULES(PC_PIXBUF QUIET gdk-pixbuf-2.0)
-		    find_path(${_module_name}_${_component}_INCLUDE_GDK_PIXBUF
-		        NAMES gdk-pixbuf/gdk-pixbuf.h
-		        HINTS ${PC_PIXBUF_INCLUDE_DIRS}
-		        PATH_SUFFIXES gdk-pixbuf-2.0
-		    )
-		    find_path(${_module_name}_${_component}_INCLUDE_GDK
-		        NAMES ${_comp_header}
-		        HINTS ${PC_${_component}_INCLUDE_DIRS}
-		        PATH_SUFFIXES ${_path_suffix}
-		    )
-			set(${_module_name}_${_component}_INCLUDE_DIR ${${_module_name}_${_component}_INCLUDE_GDK}
-														  ${${_module_name}_${_component}_INCLUDE_PANGO}
-														  ${${_module_name}_${_component}_INCLUDE_CAIRO}
-														  ${${_module_name}_${_component}_INCLUDE_GDK_PIXBUF})
-		else()
-		    find_path(${_module_name}_${_component}_INCLUDE_DIR
-		        NAMES ${_comp_header}
-		        HINTS ${PC_${_component}_INCLUDE_DIRS}
-		        PATH_SUFFIXES ${_path_suffix}
-		    )
-		endif()
-        find_library(${_module_name}_${_component}_LIBRARY
-            NAMES ${_library_name}
-            HINTS ${PC_${_component}_LIBRARY_DIRS}
-        )
-        find_package_handle_standard_args(${_module_name}_${_component}
-            REQUIRED_VARS
-                ${_module_name}_${_component}_LIBRARY
-                ${_module_name}_${_component}_INCLUDE_DIR
-                ${_comp_dep_vars}
-            VERSION_VAR
-                ${_module_name}_${_component}_VERSION
-            )
-        find_package_handle_standard_args(GTK_${_component}
-            REQUIRED_VARS
-                ${_module_name}_${_component}_LIBRARY
-                ${_module_name}_${_component}_INCLUDE_DIR
-                ${_comp_dep_vars}
-            VERSION_VAR
-                ${_module_name}_${_component}_VERSION
-            )
-        mark_as_advanced(
-            ${_module_name}_${_component}_LIBRARY
-            ${_module_name}_${_component}_INCLUDE_DIR
-        )
-        if(${_module_name}_${_component}_FOUND)
-            list(APPEND ${_module_name}_LIBRARIES
-                        "${${_module_name}_${_component}_LIBRARY}")
-            list(APPEND ${_module_name}_INCLUDE_DIRS
-                        "${${_module_name}_${_component}_INCLUDE_DIR}")
-            set(${_module_name}_DEFINITIONS
-                    ${${_module_name}_DEFINITIONS}
-                    ${PC_${_component}_DEFINITIONS})
-            if(NOT TARGET ${_module_name}::${_component})
-                add_library(${_module_name}::${_component} UNKNOWN IMPORTED)
-                set_target_properties(${_module_name}::${_component} PROPERTIES
-                    IMPORTED_LOCATION "${${_module_name}_${_component}_LIBRARY}"
-                    INTERFACE_COMPILE_OPTIONS "${PC_${_component}_DEFINITIONS}"
-                    INTERFACE_INCLUDE_DIRECTORIES "${${_module_name}_${_component}_INCLUDE_DIR}"
-                    INTERFACE_LINK_LIBRARIES "${_comp_deps}"
-                )
-            endif()
-            list(APPEND ${_module_name}_TARGETS
-                        "${_module_name}::${_component}")
-		endif()
-	elseif(_component IN_LIST GTK_COMP_TOOLS)
-		set(_program_name gtk-${_rep_comp})
-		find_program(${_module_name}_${_component}_EXECUTABLE
-			${_program_name}
-		)
-        find_package_handle_standard_args(${_module_name}_${_component}
-            REQUIRED_VARS
-                ${_module_name}_${_component}_EXECUTABLE
-            VERSION_VAR
-                ${_module_name}_${_component}_VERSION
-            )
-        find_package_handle_standard_args(GTK_${_component}
-            REQUIRED_VARS
-                ${_module_name}_${_component}_EXECUTABLE
-            VERSION_VAR
-                ${_module_name}_${_component}_VERSION
-            )
-        mark_as_advanced(
-            ${_module_name}_${_component}_EXECUTABLE
-        )
-        if(${_module_name}_${_component}_FOUND)
-            if(NOT TARGET ${_module_name}::${_component})
-                add_executable(${_module_name}::${_component} IMPORTED)
-            endif()
-            list(APPEND ${_module_name}_TARGETS
-                        "${_module_name}::${_component}")
-		endif()
-	elseif(_component IN_LIST GTK_COMP_PLATFORMS)
-		if (${_component} STREQUAL "X11")
-			set(_comp_header gdk/gdkx.h)
-		elseif(${_component} STREQUAL "BROADWAY")
-			set(_comp_header gdk/gdkbroadway.h)
-		else()
-			set(_comp_header gdk/gdkwayland.h)
-		endif()
-        find_path(${_module_name}_${_component}_INCLUDE_DIR
-            NAMES ${_comp_header}
-			HINTS ${PC_${_module_name}_INCLUDEDIR}
-				  ${PC_${_module_name}_INCLUDE_DIRS}
-			PATH_SUFFIXES gdk
-        )
-		if(${_component} STREQUAL "BROADWAY")
-			find_program(${_module_name}_${_component}D_EXECUTABLE
-				${_rep_comp}d
-			)
-		    find_package_handle_standard_args(${_module_name}_${_component}
-		        REQUIRED_VARS
-		            ${_module_name}_${_component}_INCLUDE_DIR
-					${_module_name}_${_component}D_EXECUTABLE
-		        VERSION_VAR
-		            ${_module_name}_${_component}_VERSION
-            )
-		    find_package_handle_standard_args(GTK_${_component}
-		        REQUIRED_VARS
-		            ${_module_name}_${_component}_INCLUDE_DIR
-					${_module_name}_${_component}D_EXECUTABLE
-		        VERSION_VAR
-		            ${_module_name}_${_component}_VERSION
-            )
-		    mark_as_advanced(
-		        ${_module_name}_${_component}D_EXECUTABLE
-		    )
-		    if(${_module_name}_${_component}_FOUND)
-		        if(NOT TARGET ${_module_name}::${_component}D)
-		            add_executable(${_module_name}::${_component}D IMPORTED)
-		        endif()
-		        list(APPEND ${_module_name}_TARGETS
-		                    "${_module_name}::${_component}D")
-			endif()
-		else()
-        find_package_handle_standard_args(${_module_name}_${_component}
-            REQUIRED_VARS
-                ${_module_name}_${_component}_INCLUDE_DIR
-            VERSION_VAR
-                ${_module_name}_${_component}_VERSION
-            )
-        find_package_handle_standard_args(GTK_${_component}
-            REQUIRED_VARS
-                ${_module_name}_${_component}_INCLUDE_DIR
-            VERSION_VAR
-                ${_module_name}_${_component}_VERSION
-            )
-		endif()
-        mark_as_advanced(
-            ${_module_name}_${_component}_INCLUDE_DIR
-        )
-        if(${_module_name}_${_component}_FOUND)
-            if(NOT TARGET ${_module_name}::${_component})
-                add_library(${_module_name}::${_component} UNKNOWN IMPORTED)
-                set_target_properties(${_module_name}::${_component} PROPERTIES
-                    INTERFACE_LINK_LIBRARIES ${_module_name}::GTK 
-                )
-            endif()
-            list(APPEND ${_module_name}_TARGETS
-                        "${_module_name}::${_component}")
-		endif()
-	endif()
-ENDFOREACH ()
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(${_module_name}
     REQUIRED_VARS
