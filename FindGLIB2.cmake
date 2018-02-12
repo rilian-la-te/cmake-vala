@@ -71,7 +71,7 @@ SET(GLIB_VERSION_MICRO "${CMAKE_MATCH_1}")
 SET(GLIB2_GLIB_VERSION "${GLIB_VERSION_MAJOR}.${GLIB_VERSION_MINOR}.${GLIB_VERSION_MICRO}")
 SET(GLIB2_VERSION "${GLIB2_GLIB_VERSION}")
 
-if(${GLIB2_GLIB_LIBRARY} AND ${GLIB2_GLIB_INCLUDE} AND ${GLIBCONFIG_INCLUDE_DIR})
+if(GLIB2_GLIB_LIBRARY AND GLIB2_GLIB_INCLUDE_DIRS)
 	set(GLIB_GLIB_FOUND TRUE)
 else()
 	set(GLIB2_GLIB_FOUND FALSE)
@@ -139,7 +139,7 @@ FOREACH (_component ${GLIB2_FIND_COMPONENTS})
             NAMES ${_library_name}
             HINTS ${PC_${_component}_LIBRARY_DIRS}
         )
-		if(${GLIB2_${_component}_LIBRARY} AND ${GLIB2_${_component}_INCLUDE_DIR} AND ${${_comp_dep_vars}})
+		if(GLIB2_${_component}_LIBRARY AND GLIB2_${_component}_INCLUDE_DIR AND ${_comp_dep_vars})
 			set(GLIB2_${_component}_FOUND TRUE)
 		else()
 			set(GLIB2_${_component}_FOUND FALSE)
