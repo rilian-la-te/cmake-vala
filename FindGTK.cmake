@@ -154,7 +154,7 @@ FIND_PATH(${_module_name}_ATK_INCLUDE
 )
 
 # Version detection
-FILE(READ "${${_module_name}_GTK_INCLUDE}/gtkversion.h" GTKVERSION_H_CONTENTS)
+FILE(READ "${${_module_name}_GTK_INCLUDE}/gtk/gtkversion.h" GTKVERSION_H_CONTENTS)
 STRING(REGEX MATCH "#define GTK_MAJOR_VERSION ([0-9]+)" _dummy "${GTKVERSION_H_CONTENTS}")
 SET(${_module_name}_VERSION_MAJOR "${CMAKE_MATCH_1}")
 STRING(REGEX MATCH "#define GTK_MINOR_VERSION ([0-9]+)" _dummy "${GTKVERSION_H_CONTENTS}")
