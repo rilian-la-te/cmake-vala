@@ -262,9 +262,6 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(GTK
 	HANDLE_COMPONENTS
     VERSION_VAR
         ${_module_name}_VERSION)
-if((NOT GTK_FIND_QUIETLY) AND GTK_FOUND)
-	message("Found gtk+-${_version_num}, version ${${_module_name}_VERSION}")
-endif()
 
 if(${_module_name}_LIBRARIES)
     list(REMOVE_DUPLICATES ${_module_name}_LIBRARIES)
