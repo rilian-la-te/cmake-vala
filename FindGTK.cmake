@@ -155,11 +155,11 @@ FIND_PATH(${_module_name}_ATK_INCLUDE
 
 # Version detection
 FILE(READ "${${_module_name}_GTK_INCLUDE}/gtk/gtkversion.h" GTKVERSION_H_CONTENTS)
-STRING(REGEX MATCH "#define GTK_MAJOR_VERSION \(([0-9]+)\)" _dummy "${GTKVERSION_H_CONTENTS}")
+STRING(REGEX MATCH "#define GTK_MAJOR_VERSION \\(([0-9]+)\\)" _dummy "${GTKVERSION_H_CONTENTS}")
 SET(${_module_name}_VERSION_MAJOR "${CMAKE_MATCH_1}")
-STRING(REGEX MATCH "#define GTK_MINOR_VERSION \(([0-9]+)\)" _dummy "${GTKVERSION_H_CONTENTS}")
+STRING(REGEX MATCH "#define GTK_MINOR_VERSION \\(([0-9]+)\\)" _dummy "${GTKVERSION_H_CONTENTS}")
 SET(${_module_name}_VERSION_MINOR "${CMAKE_MATCH_1}")
-STRING(REGEX MATCH "#define GTK_MICRO_VERSION \(([0-9]+)\)" _dummy "${GTKVERSION_H_CONTENTS}")
+STRING(REGEX MATCH "#define GTK_MICRO_VERSION \\(([0-9]+)\\)" _dummy "${GTKVERSION_H_CONTENTS}")
 SET(${_module_name}_VERSION_MICRO "${CMAKE_MATCH_1}")
 SET(${_module_name}_VERSION "${${_module_name}_VERSION_MAJOR}.${${_module_name}_VERSION_MINOR}.${${_module_name}_VERSION_MICRO}")
 SET(GTK_VERSION "${${_module_name}_VERSION}")
