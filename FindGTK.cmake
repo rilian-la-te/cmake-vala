@@ -101,7 +101,7 @@ if(${_module_name}_GDK_FOUND)
     list(APPEND ${_module_name}_LIBRARIES
                 "${${_module_name}_GDK_LIBRARY}")
     list(APPEND ${_module_name}_INCLUDE_DIRS
-                "${${_module_name}_GDK_INCLUDE}")
+                "${${_module_name}_GDK_INCLUDE_DIR}")
     set(${_module_name}_DEFINITIONS
             ${${_module_name}_DEFINITIONS}
             ${PC_GDK_DEFINITIONS})
@@ -182,7 +182,7 @@ if(${_module_name}_GTK_FOUND)
     list(APPEND ${_module_name}_LIBRARIES
                 "${${_module_name}_GTK_LIBRARY}")
     list(APPEND ${_module_name}_INCLUDE_DIRS
-                "${${_module_name}_GTK_INCLUDE}")
+                "${${_module_name}_GTK_INCLUDE_DIRS}")
     set(${_module_name}_DEFINITIONS
             ${${_module_name}_DEFINITIONS}
             ${PC_${_module_name}_DEFINITIONS})
