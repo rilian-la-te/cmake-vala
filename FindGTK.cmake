@@ -80,9 +80,10 @@ find_path(${_module_name}_INCLUDE_GDK
     PATH_SUFFIXES gdk-${_version_num}
 )
 set(${_module_name}_GDK_INCLUDE_DIR ${${_module_name}_INCLUDE_GDK}
-											  ${${_module_name}_INCLUDE_PANGO}
-											  ${${_module_name}_INCLUDE_CAIRO}
-											  ${${_module_name}_INCLUDE_GDK_PIXBUF})
+									  ${${_module_name}_INCLUDE_PANGO}
+									  ${${_module_name}_INCLUDE_CAIRO}
+									  ${${_module_name}_INCLUDE_GDK_PIXBUF}
+									  ${${_module_name}_GDK_CONFIG_INCLUDE_DIR})
 
 if(${_module_name}_GDK_INCLUDE_DIR AND ${_module_name}_GDK_LIBRARY)
 	set(${_module_name}_GDK_FOUND TRUE)
