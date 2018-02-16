@@ -24,7 +24,6 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-
 INCLUDE(FindPackageHandleStandardArgs)
 include(GNUInstallDirs)
 FIND_PACKAGE(PkgConfig QUIET)
@@ -77,11 +76,13 @@ if(BAMF_LIB_FOUND)
     list(APPEND BAMF_TARGETS
                 "BAMF::LIB")
 endif()
+get_filename_component(BAMF_LIBDIR ${BAMF_LIB_LIBRARY} DIRECTORY)
 
 find_program(BAMF_DAEMON_EXECUTABLE
 	bamfdaemon
 	HINTS ${CMAKE_INSTALL_FULL_LIBDIR}
 		  ${CMAKE_INSTALL_FULL_LIBEXECDIR}
+		  ${BAMF_LIBDIR}
 	PATH_SUFFIXES bamf
 )
 
