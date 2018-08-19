@@ -1,3 +1,19 @@
+# Copyright (C) 2003-2008 TSP Developer Team <https://savannah.nongnu.org/projects/tsp>
+# Copyright (C) 2018 Konstantin Pugin <ria.freelander@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 2.1 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 #
 # - Find tools needed for building RPM Packages
 #   on Linux systems and defines macro that helps to
@@ -9,9 +25,6 @@
 # - Define RPMTools_ADD_RPM_TARGETS which defines
 #   two (top-level) CUSTOM targets for building
 #   source and binary RPMs
-#
-# Those CMake macros are provided by the TSP Developer Team
-# https://savannah.nongnu.org/projects/tsp
 #
 
 IF (WIN32)  
