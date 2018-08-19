@@ -1,0 +1,78 @@
+cmake_minimum_required (VERSION 3.3)
+cmake_policy (VERSION 3.3)
+project (VCM LANGUAGES NONE)
+enable_testing ()
+include(GNUInstallDirs)
+include(FeatureSummary)
+
+set(PROJECT_VERSION 0.1.0)
+
+set(PACKAGE_INSTALL_DIR ${CMAKE_INSTALL_FULL_DATAROOTDIR}/${CMAKE_PROJECT_NAME})
+set(FIND_MODULE_DIR ${PACKAGE_INSTALL_DIR}/Find)
+set(GIT_VERSION_MODULE_DIR ${PACKAGE_INSTALL_DIR}/GitVersion)
+set(GLIB_MODULE_DIR ${PACKAGE_INSTALL_DIR}/GLib)
+set(UTILITY_MODULE_DIR ${PACKAGE_INSTALL_DIR}/Utility)
+set(VALA_MODULE_DIR ${PACKAGE_INSTALL_DIR}/Vala)
+
+install(DIRECTORY Find DESTINATION ${PACKAGE_INSTALL_DIR} USE_SOURCE_PERMISSIONS)
+install(DIRECTORY GitVersion DESTINATION ${PACKAGE_INSTALL_DIR} USE_SOURCE_PERMISSIONS)
+install(DIRECTORY GLib DESTINATION ${PACKAGE_INSTALL_DIR} USE_SOURCE_PERMISSIONS)
+install(DIRECTORY Utility DESTINATION ${PACKAGE_INSTALL_DIR} USE_SOURCE_PERMISSIONS)
+install(DIRECTORY Vala DESTINATION ${PACKAGE_INSTALL_DIR} USE_SOURCE_PERMISSIONS)
+
+#
+# Config.cmake file
+#
+
+include(CMakePackageConfigHelpers)
+
+configure_package_config_file(
+    VCMConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/VCMConfig.cmake
+    INSTALL_DESTINATION
+        ${PACKAGE_INSTALL_DIR}
+    PATH_VARS
+        FIND_MODULE_DIR
+        GIT_VERSION_MODULE_DIR
+        GLIB_MODULE_DIR
+        UTILITY_MODULE_DIR
+        VALA_MODULE_DIR
+)
+
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/VCMConfigVersion.cmake
+    VERSION
+        "${PROJECT_VERSION}"
+    COMPATIBILITY
+        AnyNewerVersion
+)
+
+install(
+    FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/VCMConfig.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/VCMConfigVersion.cmake
+    DESTINATION
+        ${PACKAGE_INSTALL_DIR}
+)
+
+#
+# Packaging
+#
+
+set(CPACK_PACKAGE_NAME vala-cmake-modules)
+set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
+set(CPACK_SYSTEM_NAME "generic")
+set(CPACK_GENERATOR "TGZ")
+set(CPACK_SET_DESTDIR FALSE)
+
+include(CPack)
+
+
+#
+# Feature summary
+#
+
+feature_summary(
+    FATAL_ON_MISSING_REQUIRED_PACKAGES
+    WHAT ALL
+)

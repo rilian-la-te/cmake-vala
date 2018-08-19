@@ -29,7 +29,7 @@
 ##
 
 include(CMakeParseArguments)
-find_package(Vala REQUIRED QUIET)
+find_package(Vala QUIET)
 
 ##
 # Compile vala files to their c equivalents for further processing. 

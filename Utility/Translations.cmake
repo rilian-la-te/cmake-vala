@@ -22,9 +22,10 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+find_package(Gettext REQUIRED)
+
 macro (add_translations_directory NLS_PACKAGE)
     add_custom_target (i18n ALL COMMENT “Building i18n messages.”)
-    find_program (MSGFMT_EXECUTABLE msgfmt)
     # be sure that all languages are present
     # Using all usual languages code from https://www.gnu.org/software/gettext/manual/html_node/Language-Codes.html#Language-Codes
     # Rare language codes should be added on-demand.
@@ -41,7 +42,7 @@ macro (add_translations_directory NLS_PACKAGE)
         set (MO_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${PO_INPUT_BASE}.mo)
         set (PO_COPY ${CMAKE_CURRENT_BINARY_DIR}/${PO_INPUT_BASE}.po)
         file (COPY ${PO_INPUT} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-        add_custom_command (TARGET i18n COMMAND ${MSGFMT_EXECUTABLE} -o ${MO_OUTPUT} ${PO_INPUT})
+        add_custom_command (TARGET i18n COMMAND ${GETTEXT_MSGFMT_EXECUTABLE} -o ${MO_OUTPUT} ${PO_INPUT})
 
         install (FILES ${MO_OUTPUT} DESTINATION
             share/locale/${PO_INPUT_BASE}/LC_MESSAGES
@@ -55,7 +56,7 @@ macro (add_translations_directory NLS_PACKAGE)
         string(REGEX REPLACE ".desktop.plugin.in$" "" PLUGIN_FILE ${BASE_NAME})
         get_filename_component( BASE_DIRECTORY ${PLUGIN_DESKTOP_IN_FILE} PATH )
         file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${BASE_DIRECTORY})
-        add_custom_command (TARGET i18n COMMAND ${MSGFMT_EXECUTABLE} --desktop --keyword=Name --keyword=Description --keyword=Help -d ${CMAKE_CURRENT_BINARY_DIR} --template ${CMAKE_SOURCE_DIR}/${PLUGIN_DESKTOP_IN_FILE} -o ${CMAKE_BINARY_DIR}/${BASE_DIRECTORY}/${PLUGIN_FILE}.plugin)
+        add_custom_command (TARGET i18n COMMAND ${GETTEXT_MSGFMT_EXECUTABLE} --desktop --keyword=Name --keyword=Description --keyword=Help -d ${CMAKE_CURRENT_BINARY_DIR} --template ${CMAKE_SOURCE_DIR}/${PLUGIN_DESKTOP_IN_FILE} -o ${CMAKE_BINARY_DIR}/${BASE_DIRECTORY}/${PLUGIN_FILE}.plugin)
     endforeach()
     file (GLOB_RECURSE SOURCE_FILES RELATIVE ${CMAKE_SOURCE_DIR}/ ${CMAKE_SOURCE_DIR}/*.desktop.in)
     foreach(DESKTOP_IN_FILE ${SOURCE_FILES})
@@ -63,7 +64,7 @@ macro (add_translations_directory NLS_PACKAGE)
         string(REGEX REPLACE ".desktop.in$" "" PLUGIN_FILE ${BASE_NAME})
         get_filename_component( BASE_DIRECTORY ${DESKTOP_IN_FILE} PATH )
         file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${BASE_DIRECTORY})
-        add_custom_command (TARGET i18n COMMAND ${MSGFMT_EXECUTABLE} --desktop -d ${CMAKE_CURRENT_BINARY_DIR} --template ${CMAKE_SOURCE_DIR}/${DESKTOP_IN_FILE} -o ${CMAKE_BINARY_DIR}/${BASE_DIRECTORY}/${PLUGIN_FILE}.desktop)
+        add_custom_command (TARGET i18n COMMAND ${GETTEXT_MSGFMT_EXECUTABLE} --desktop -d ${CMAKE_CURRENT_BINARY_DIR} --template ${CMAKE_SOURCE_DIR}/${DESKTOP_IN_FILE} -o ${CMAKE_BINARY_DIR}/${BASE_DIRECTORY}/${PLUGIN_FILE}.desktop)
     endforeach()
     file (GLOB_RECURSE SOURCE_FILES RELATIVE ${CMAKE_SOURCE_DIR}/ ${CMAKE_SOURCE_DIR}/*.desktop.xfce.in)
     foreach(XFCE_DESKTOP_IN_FILE ${SOURCE_FILES})
@@ -71,7 +72,7 @@ macro (add_translations_directory NLS_PACKAGE)
         string(REGEX REPLACE ".desktop.xfce.in$" "" PLUGIN_FILE ${BASE_NAME})
         get_filename_component( BASE_DIRECTORY ${XFCE_DESKTOP_IN_FILE} PATH )
         file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${BASE_DIRECTORY})
-        add_custom_command (TARGET i18n COMMAND ${MSGFMT_EXECUTABLE} --desktop --keyword=Name --keyword=Comment --keyword=Help -d ${CMAKE_CURRENT_BINARY_DIR} --template ${CMAKE_SOURCE_DIR}/${XFCE_DESKTOP_IN_FILE} -o ${CMAKE_BINARY_DIR}/${BASE_DIRECTORY}/${PLUGIN_FILE}.desktop)
+        add_custom_command (TARGET i18n COMMAND ${GETTEXT_MSGFMT_EXECUTABLE} --desktop --keyword=Name --keyword=Comment --keyword=Help -d ${CMAKE_CURRENT_BINARY_DIR} --template ${CMAKE_SOURCE_DIR}/${XFCE_DESKTOP_IN_FILE} -o ${CMAKE_BINARY_DIR}/${BASE_DIRECTORY}/${PLUGIN_FILE}.desktop)
     endforeach()
     file (GLOB_RECURSE SOURCE_FILES RELATIVE ${CMAKE_SOURCE_DIR}/ ${CMAKE_SOURCE_DIR}/*.appdata.xml.in)
     foreach(APPDATA_XML_IN_FILE ${SOURCE_FILES})
@@ -79,7 +80,7 @@ macro (add_translations_directory NLS_PACKAGE)
         string(REGEX REPLACE ".appdata.xml.in$" "" PLUGIN_FILE ${BASE_NAME})
         get_filename_component( BASE_DIRECTORY ${APPDATA_XML_IN_FILE} PATH )
         file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${BASE_DIRECTORY})
-        add_custom_command (TARGET i18n COMMAND ${MSGFMT_EXECUTABLE} --xml -Lappdata -d ${CMAKE_CURRENT_BINARY_DIR} --template ${CMAKE_SOURCE_DIR}/${APPDATA_XML_IN_FILE} -o ${CMAKE_BINARY_DIR}/${BASE_DIRECTORY}/${PLUGIN_FILE}.appdata.xml)
+        add_custom_command (TARGET i18n COMMAND ${GETTEXT_MSGFMT_EXECUTABLE} --xml -Lappdata -d ${CMAKE_CURRENT_BINARY_DIR} --template ${CMAKE_SOURCE_DIR}/${APPDATA_XML_IN_FILE} -o ${CMAKE_BINARY_DIR}/${BASE_DIRECTORY}/${PLUGIN_FILE}.appdata.xml)
     endforeach()
 endmacro (add_translations_directory)
 
