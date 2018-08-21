@@ -1,5 +1,9 @@
 macro(determine_fallback_version CMAKE_VERSION_MODULE_PATH)
-    if(EXISTS ${CMAKE_SOURCE_DIR}/.git)
+    determine_fallback_version_for_subproject(${CMAKE_VERSION_MODULE_PATH} ${CMAKE_SOURCE_DIR})
+endmacro()
+
+macro(determine_fallback_version_for_subproject CMAKE_VERSION_MODULE_PATH CMAKE_VERSION_GIT_DIR)
+    if(EXISTS ${CMAKE_VERSION_GIT_DIR}/.git)
         #
         # Make a version containing the current version from git.
         #
